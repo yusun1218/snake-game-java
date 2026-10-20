@@ -2,7 +2,7 @@
 
 The classic Snake game, written in Java with Swing. I built it for my Data Structures and Algorithms course (CSCI 5557) at Fairleigh Dickinson University in fall 2024. The goal of the assignment was to use a data structure in something that actually runs, so the snake's body is stored as a linked list.
 
-![Snake gameplay](screenshots/gameplay.gif)
+![Snake gameplay](screenshots/snake-levels-demo.gif)
 
 ## How to play
 
