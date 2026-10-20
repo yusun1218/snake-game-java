@@ -61,7 +61,7 @@ Other parts of the game:
 - **No instant reversing.** The key handler ignores a turn straight back into the snake's own direction (left while moving right, for example).
 - **Food placement.** Food appears on a random tile using `java.util.Random`.
 - **Levels.** The level is just `score / 5`. It picks the food image from an array and sets the timer delay, so one number controls both.
-- **Drawing.** The grid, snake, start button and game over box are drawn with `Graphics2D` in `paintComponent`. The food is a PNG icon scaled down to one tile.
+- **Drawing.** Everything except the food is drawn with `Graphics2D` in `paintComponent`. The snake's body is one thick line with rounded ends that passes through the center of every segment, so it bends smoothly around corners. The eyes move to the front of the head depending on which way the snake is going. The food is a PNG icon scaled down to one tile.
 
 ## What I'd improve next
 
@@ -74,7 +74,7 @@ Looking back at this code now, these are the things I'd change:
 ## Files
 
 ```text
-src/SnakeGame.java     the whole game (about 280 lines)
+src/SnakeGame.java     the whole game (about 320 lines)
 images/                food icons
 screenshots/           gameplay recording for this README
 ```

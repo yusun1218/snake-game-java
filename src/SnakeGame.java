@@ -146,12 +146,51 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
     }
 
     private void drawSnake(Graphics g) {
-        g.setColor(new Color(60, 180, 75));
-        for (Tile part : snakeBody) {
-            g.fillRoundRect(part.x * TILE_SIZE + 1, part.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2, 10, 10);
+        Graphics2D g2 = (Graphics2D) g.create(); // a copy, so the thick line setting doesn't affect other drawing
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // body: one thick line with round ends that goes through the middle of every segment
+        int n = snakeBody.size();
+        int[] xs = new int[n], ys = new int[n];
+        for (int i = 0; i < n; i++) {
+            xs[i] = snakeBody.get(i).x * TILE_SIZE + TILE_SIZE / 2;
+            ys[i] = snakeBody.get(i).y * TILE_SIZE + TILE_SIZE / 2;
         }
-        g.setColor(new Color(30, 120, 45)); // darker head so you can tell which end is the front
-        g.fillRoundRect(snakeHead.x * TILE_SIZE, snakeHead.y * TILE_SIZE, TILE_SIZE, TILE_SIZE, 12, 12);
+        g2.setColor(new Color(60, 180, 75));
+        g2.setStroke(new BasicStroke(TILE_SIZE - 8, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawPolyline(xs, ys, n);
+
+        int x = snakeHead.x * TILE_SIZE, y = snakeHead.y * TILE_SIZE;
+        int centerX = x + TILE_SIZE / 2, centerY = y + TILE_SIZE / 2;
+
+        // tongue: a red line sticking out in the direction the snake is moving
+        g2.setColor(Color.red);
+        g2.setStroke(new BasicStroke(3));
+        g2.drawLine(centerX, centerY, centerX + dx * TILE_SIZE, centerY + dy * TILE_SIZE);
+
+        // head: darker green so you can tell which end is the front
+        g2.setColor(new Color(30, 120, 45));
+        g2.fillOval(x - 4, y - 4, TILE_SIZE + 8, TILE_SIZE + 8);
+
+        // eyes: two white circles on the front side of the head
+        int eye1X, eye1Y, eye2X, eye2Y;
+        if (dx == 1) {          // moving right
+            eye1X = x + 20; eye1Y = y + 6;  eye2X = x + 20; eye2Y = y + 20;
+        } else if (dx == -1) {  // moving left
+            eye1X = x + 6;  eye1Y = y + 6;  eye2X = x + 6;  eye2Y = y + 20;
+        } else if (dy == -1) {  // moving up
+            eye1X = x + 6;  eye1Y = y + 6;  eye2X = x + 20; eye2Y = y + 6;
+        } else {                // moving down
+            eye1X = x + 6;  eye1Y = y + 20; eye2X = x + 20; eye2Y = y + 20;
+        }
+        g2.setColor(Color.white);
+        g2.fillOval(eye1X, eye1Y, 10, 10);
+        g2.fillOval(eye2X, eye2Y, 10, 10);
+        g2.setColor(Color.black);
+        g2.fillOval(eye1X + 3, eye1Y + 3, 5, 5);
+        g2.fillOval(eye2X + 3, eye2Y + 3, 5, 5);
+
+        g2.dispose();
     }
 
     private void drawGameOver(Graphics g) {
