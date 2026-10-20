@@ -7,7 +7,7 @@ import javax.swing.*;
 
 
 public class SnakeGame extends JPanel implements ActionListener, KeyListener {
-    private static final int TILE_SIZE = 25;
+    private static final int TILE_SIZE = 35;
     private final int boardWidth;
     private final int boardHeight;
 
@@ -27,6 +27,16 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
     private int dx = 1, dy = 0;
     private boolean gameOver = false, gameStarted = false;
     private final Random random = new Random();
+
+    // a new food every level, from a small snack up to dessert
+    private final Image[] foodIcons = {
+        new ImageIcon("images/cheese.png").getImage(),
+        new ImageIcon("images/croissant.png").getImage(),
+        new ImageIcon("images/noodles.png").getImage(),
+        new ImageIcon("images/burger.png").getImage(),
+        new ImageIcon("images/steak.png").getImage(),
+        new ImageIcon("images/banana-split.png").getImage()
+    };
 
     public SnakeGame(int boardWidth, int boardHeight) {
         this.boardWidth = boardWidth;
@@ -119,20 +129,29 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         int textY = btnY + fm.getAscent() + 20;
         g2.drawString(startText, textX, textY);
 
+        g2.setFont(new Font("Arial", Font.PLAIN, 14));
+        g2.setColor(Color.white);
+        g2.drawString("Food icons by Icons8", 10, boardHeight - 10);
+
         g2.dispose();
     }
 
     private void drawFood(Graphics g) {
-        g.setColor(Color.orange);
-        g.fillRect(food.x * TILE_SIZE, food.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        Image icon = foodIcons[Math.min(level(), foodIcons.length - 1)];
+        Graphics2D g2 = (Graphics2D) g;
+        // smooth scaling so the 100px icon doesn't look jagged when shrunk to one tile
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        // the icons have empty space around them, so draw a little bigger than the tile
+        g2.drawImage(icon, food.x * TILE_SIZE - 4, food.y * TILE_SIZE - 4, TILE_SIZE + 8, TILE_SIZE + 8, null);
     }
 
     private void drawSnake(Graphics g) {
-        g.setColor(Color.green);
-        g.fillRect(snakeHead.x * TILE_SIZE, snakeHead.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        g.setColor(new Color(60, 180, 75));
         for (Tile part : snakeBody) {
-            g.fillRect(part.x * TILE_SIZE, part.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            g.fillRoundRect(part.x * TILE_SIZE + 1, part.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2, 10, 10);
         }
+        g.setColor(new Color(30, 120, 45)); // darker head so you can tell which end is the front
+        g.fillRoundRect(snakeHead.x * TILE_SIZE, snakeHead.y * TILE_SIZE, TILE_SIZE, TILE_SIZE, 12, 12);
     }
 
     private void drawGameOver(Graphics g) {
@@ -170,10 +189,15 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         return Math.max(0, snakeBody.size() - 1);
     }
 
+    // every 5 points is a new level
+    private int level() {
+        return score() / 5;
+    }
+
     private void drawScore(Graphics g) {
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Score: " + score(), 10, 20);
+        g.drawString("Score: " + score() + "   Level: " + (level() + 1), 10, 20);
     }
     // ****************  draw methods  *******************
 
@@ -198,6 +222,8 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
 
         if (collidesWith(food)) {
             placeFood();
+            // speed up 15 ms per level, but never faster than one move every 70 ms
+            gameLoop.setDelay(Math.max(70, 140 - level() * 15));
         } else {
            
              if (snakeBody.size() > 1) { 
